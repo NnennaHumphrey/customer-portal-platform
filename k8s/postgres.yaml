@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: portal
+data:
+  init.sql: |
+    CREATE DATABASE auth;
+    CREATE DATABASE customers;
+    CREATE DATABASE billing;
+    CREATE DATABASE notifications;
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: portal
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: postgres}
+  template:
+    metadata:
+      labels: {app: postgres}
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - {name: POSTGRES_USER, value: portal}
+            - {name: POSTGRES_DB, value: portal}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef: {name: portal-secrets, key: DB_PASSWORD}
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "portal"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - {name: init, mountPath: /docker-entrypoint-initdb.d}
+            - {name: data, mountPath: /var/lib/postgresql/data}
+      volumes:
+        - name: init
+          configMap: {name: postgres-init}
+        - name: data
+          emptyDir: {}   # demo only: data is lost when the pod restarts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: portal
+spec:
+  selector: {app: postgres}
+  ports:
+    - port: 5432

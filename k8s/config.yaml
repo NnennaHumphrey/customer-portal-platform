@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portal-config
+  namespace: portal
+data:
+  EUREKA_URL: http://discovery-server:8761/eureka
+  DB_HOST: postgres
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.1"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin:9411/api/v2/spans
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: portal-secrets
+  namespace: portal
+type: Opaque
+stringData:
+  # Demo values only. Replace before any real deployment.
+  JWT_SECRET: dev-only-secret-change-me-dev-only-secret-change-me
+  DB_USER: portal
+  DB_PASSWORD: portal

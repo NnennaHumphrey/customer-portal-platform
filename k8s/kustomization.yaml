@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - config.yaml
+  - postgres.yaml
+  - zipkin.yaml
+  - hpa.yaml
+  - discovery-server.yaml
+  - api-gateway.yaml
+  - auth-service.yaml
+  - billing-service.yaml
+  - customer-service.yaml
+  - notification-service.yaml
